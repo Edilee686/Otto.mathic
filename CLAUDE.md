@@ -29,6 +29,11 @@ Spec: https://claude.ai/artifact/Hs6FwEAUFdjTaLtCaqaFQf (8-step build plan, data
 - `flutter run` (Android device/emulator) or `flutter run -d chrome`
 - `flutter build apk --release`
 
+## Repo and brand
+Code lives in GitHub `Edilee686/Otto.mathic` (moved from Otto.English on 31 Oct 2026). The app icon and logo are drawn
+from Otto's painter: `flutter test tool/render_icon_test.dart` writes build/icon/otto.png; logo files are in assets/brand/.
+GitHub Actions (`.github/workflows/android-apk.yml`) builds a test APK artifact on every push to main.
+
 ## MVP status (31 Oct 2026)
 Done: build-plan steps 1-4; Trick School with ×11 and ×5 (`TrickDef` list in `screens/trick_screens.dart`);
 "Otto Reads Minds" (Always 5, with How-it-works and Show Time script); Juggler's Balls (make 10/20/50/100).
