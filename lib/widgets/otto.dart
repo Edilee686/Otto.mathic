@@ -50,7 +50,7 @@ class _OttoState extends State<Otto> with SingleTickerProviderStateMixin {
           animation: _c,
           builder: (context, _) => CustomPaint(
             size: Size(widget.size, widget.size * (widget.balls > 0 ? 1.45 : 1.15)),
-            painter: _OttoPainter(_c.value, widget.balls, widget.mood),
+            painter: OttoPainter(_c.value, widget.balls, widget.mood),
           ),
         ),
       ),
@@ -58,9 +58,11 @@ class _OttoState extends State<Otto> with SingleTickerProviderStateMixin {
   }
 }
 
-class _OttoPainter extends CustomPainter {
-  _OttoPainter(this.t, this.balls, this.mood);
+/// Paints Otto. Public so tools (e.g. the app-icon renderer) can draw a still frame.
+class OttoPainter extends CustomPainter {
+  OttoPainter(this.t, this.balls, this.mood, {this.floorShadow = true});
   final double t;
+  final bool floorShadow;
   final int balls;
   final OttoMood mood;
 
@@ -91,30 +93,42 @@ class _OttoPainter extends CustomPainter {
     }
 
     // Soft shadow on the floor.
-    canvas.drawOval(
+    if (floorShadow) {
+      canvas.drawOval(
         Rect.fromCenter(center: Offset(cx, headY + r * 1.62), width: w * 0.7, height: w * 0.07),
         Paint()..color = Palette.violetDeep.withValues(alpha: 0.12));
+    }
 
-    final body = Paint()..color = Palette.violet;
-    final bodyDark = Paint()..color = _armDark;
 
-    // Eight wavy arms.
-    for (var i = 0; i < 8; i++) {
-      final spread = (i - 3.5) / 3.5; // -1..1
-      final path = Path();
-      final startX = cx + spread * r * 0.8;
-      final startY = headY + r * 0.55;
-      final wave = sin(t * 2 * pi + i) * w * 0.03;
-      final endX = cx + spread * w * 0.46 + wave;
-      final endY = headY + r * 1.45 + (1 - spread.abs()) * w * 0.05;
-      path.moveTo(startX - w * 0.035, startY);
-      path.quadraticBezierTo(
-          (startX + endX) / 2 + wave, (startY + endY) / 2 + w * 0.03, endX, endY);
-      path.quadraticBezierTo((startX + endX) / 2 + wave + w * 0.05,
-          (startY + endY) / 2, startX + w * 0.035, startY);
-      path.close();
-      canvas.drawPath(path, i.isEven ? body : bodyDark);
-      canvas.drawCircle(Offset(endX, endY), w * 0.022, i.isEven ? body : bodyDark);
+    // Eight soft, curly arms: back arms (darker) first, then front arms.
+    for (final back in [true, false]) {
+      for (var i = 0; i < 8; i++) {
+        if ((i.isOdd) != back) continue;
+        final spread = (i - 3.5) / 3.5; // -1..1
+        final side = spread == 0 ? 1.0 : spread.sign;
+        final wave = sin(t * 2 * pi + i) * w * 0.025;
+        final start = Offset(cx + spread * r * 0.7, headY + r * 0.45);
+        final end = Offset(cx + spread * w * 0.40 + wave, headY + r * 1.38 - spread.abs() * r * 0.18);
+        final curlTip = end + Offset(side * w * 0.075, -w * 0.05);
+        final path = Path()
+          ..moveTo(start.dx, start.dy)
+          ..quadraticBezierTo(
+              (start.dx + end.dx) / 2 - side * w * 0.03 + wave, end.dy + w * 0.01, end.dx, end.dy)
+          ..quadraticBezierTo(end.dx + side * w * 0.06, end.dy + w * 0.03, curlTip.dx, curlTip.dy);
+        canvas.drawPath(
+          path,
+          Paint()
+            ..color = back ? _armDark : Palette.violet
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = w * 0.072
+            ..strokeCap = StrokeCap.round
+            ..strokeJoin = StrokeJoin.round,
+        );
+        // A couple of suction cups near the tip.
+        final cup = Paint()..color = const Color(0xFFC9B8FF).withValues(alpha: back ? 0.55 : 0.9);
+        canvas.drawCircle(Offset.lerp(end, curlTip, 0.15)! + Offset(0, w * 0.012), w * 0.013, cup);
+        canvas.drawCircle(Offset.lerp(start, end, 0.72)! + Offset(-side * w * 0.006, w * 0.016), w * 0.011, cup);
+      }
     }
 
     // Head with a soft highlight.
@@ -206,6 +220,6 @@ class _OttoPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_OttoPainter old) =>
+  bool shouldRepaint(OttoPainter old) =>
       old.t != t || old.balls != balls || old.mood != mood;
 }
