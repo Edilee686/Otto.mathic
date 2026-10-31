@@ -7,7 +7,13 @@
   "pickBuddy": "Pick your buddy",
   "letsGo": "Let's go!",
   "hello": "Hi, {name}! Ready for some magic?",
-  "@hello": {"placeholders": {"name": {"type": "String"}}},
+  "@hello": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "whoIsPlaying": "Who is playing today?",
   "newPlayer": "New player",
   "switchPlayer": "Switch player",
@@ -18,11 +24,23 @@
   "multiplication": "Multiplication",
   "division": "Division",
   "level": "Level {level}",
-  "@level": {"placeholders": {"level": {"type": "int"}}},
+  "@level": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
   "trickX11Title": "The ×11 Trick",
   "trickX11Tagline": "Multiply a two-digit number by 11 in a flash!",
-  "trickIntro": "Watch me do {a} × 11 faster than a calculator!",
-  "@trickIntro": {"placeholders": {"a": {"type": "int"}}},
+  "trickIntro": "Watch me do {problem} faster than a calculator!",
+  "@trickIntro": {
+    "placeholders": {
+      "problem": {
+        "type": "String"
+      }
+    }
+  },
   "trickStep1": "Pull the two digits apart and leave a gap.",
   "trickStep2": "Add the two digits together.",
   "trickStep3": "Put the sum in the gap. Abracadabra!",
@@ -37,12 +55,33 @@
   "cheer2": "Great!",
   "cheer3": "Super!",
   "answerIs": "The answer is {answer}",
-  "@answerIs": {"placeholders": {"answer": {"type": "int"}}},
+  "@answerIs": {
+    "placeholders": {
+      "answer": {
+        "type": "int"
+      }
+    }
+  },
   "showsOver": "Take a bow!",
   "youGot": "You got {correct} of {total} right",
-  "@youGot": {"placeholders": {"correct": {"type": "int"}, "total": {"type": "int"}}},
+  "@youGot": {
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "coinsEarned": "Coins: +{coins}",
-  "@coinsEarned": {"placeholders": {"coins": {"type": "int"}}},
+  "@coinsEarned": {
+    "placeholders": {
+      "coins": {
+        "type": "int"
+      }
+    }
+  },
   "levelUp": "Level up! Next round gets a bit harder.",
   "levelDown": "Next round will be a little easier.",
   "trickUnlocked": "New trick card for your Trick Book!",
@@ -51,5 +90,97 @@
   "toMap": "Back to the map",
   "trickBook": "Trick Book",
   "locked": "Not yet unlocked",
-  "language": "Language"
+  "language": "Language",
+  "trickX5Title": "The ×5 Trick",
+  "trickX5Tagline": "Multiply by 10, then take half!",
+  "x5Step1": "First multiply by 10: just add a zero.",
+  "x5Step2": "Now take half.",
+  "x5Step3": "That's the answer. Abracadabra!",
+  "x5Rule": "Easiest with even numbers.",
+  "magicShow": "Magic Show",
+  "mindTitle": "Otto Reads Minds",
+  "mindTagline": "Think of a number and Otto will guess the answer!",
+  "mindPrediction": "I've hidden my prediction under my hat!",
+  "mindThink": "Think of a number from 1 to 20 and type it. I'm covering my eyes!",
+  "mindDouble": "Double your number. What do you get?",
+  "mindAdd": "Add {n}. What do you get?",
+  "mindHalve": "Now take half. What do you get?",
+  "mindSubtract": "Take away the number you first thought of. What's left?",
+  "mindReveal": "You got {k}! Let's peek under the hat...",
+  "mindRange": "Pick a number from 1 to 20.",
+  "howItWorks": "How does it work?",
+  "mindHow1": "Your secret number is a bag of balls. Doubling it makes two bags.",
+  "mindHow2": "Adding {n} puts {n} loose balls next to the bags.",
+  "mindHow3": "Taking half leaves one bag and {k} loose balls.",
+  "mindHow4": "Taking away your number removes the bag, so {k} is always left, whatever you picked!",
+  "performIt": "Perform it for your family",
+  "showTime": "Show Time!",
+  "showTimeIntro": "Do the magic on your family! Read these lines out loud:",
+  "scriptThink": "Think of a number.",
+  "scriptDouble": "Double it.",
+  "scriptAdd": "Add {n}.",
+  "scriptHalve": "Take half.",
+  "scriptSubtract": "Take away the number you started with.",
+  "scriptReveal": "Your answer is {k}!",
+  "circusGames": "Circus Games",
+  "jugglerTitle": "Juggler's Balls",
+  "jugglerTagline": "Find the ball that makes 10!",
+  "jugglerAsk": "Which ball makes {target}?",
+  "done": "Done",
+  "@mindAdd": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@mindReveal": {
+    "placeholders": {
+      "k": {
+        "type": "int"
+      }
+    }
+  },
+  "@mindHow2": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@mindHow3": {
+    "placeholders": {
+      "k": {
+        "type": "int"
+      }
+    }
+  },
+  "@mindHow4": {
+    "placeholders": {
+      "k": {
+        "type": "int"
+      }
+    }
+  },
+  "@scriptAdd": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "@scriptReveal": {
+    "placeholders": {
+      "k": {
+        "type": "int"
+      }
+    }
+  },
+  "@jugglerAsk": {
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  }
 }

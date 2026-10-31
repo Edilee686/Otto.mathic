@@ -11,6 +11,7 @@ import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/otto.dart';
 import 'results_screen.dart';
+import 'trick_screens.dart';
 
 const int roundLength = 10;
 
@@ -119,9 +120,17 @@ class _PracticeScreenState extends State<PracticeScreen> {
     if (_answers.length >= roundLength) {
       final state = AppScope.of(context);
       final nav = Navigator.of(context);
+      final l = AppLocalizations.of(context);
       final outcome = await state.finishRound(widget.skill, List.of(_answers));
+      final skill = widget.skill;
+      final trick = trickSkills.contains(skill) ? trickFor(skill) : null;
       nav.pushReplacement(MaterialPageRoute(
-          builder: (_) => ResultsScreen(skill: widget.skill, outcome: outcome)));
+          builder: (_) => ResultsScreen(
+                outcome: outcome,
+                newCard: outcome.trickUnlocked && trick != null ? (trick.symbol, trick.title(l)) : null,
+                onAgain: () => nav.pushReplacement(
+                    MaterialPageRoute(builder: (_) => PracticeScreen(skill: skill))),
+              )));
       return;
     }
     setState(() {
@@ -146,7 +155,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
     };
     final feedbackColor = _feedback == _Feedback.correct ? Palette.mint : Palette.coral;
 
-    return Scaffold(
+    return AppScaffold(
       body: SafeArea(
         child: LayoutBuilder(builder: (context, box) {
           final compact = box.maxHeight < 700;
@@ -156,31 +165,21 @@ class _PracticeScreenState extends State<PracticeScreen> {
               child: Row(children: [
                 IconButton(
                   tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-                  icon: const Icon(Icons.close_rounded, size: 32),
+                  icon: const Icon(Icons.close_rounded, size: 30),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: LinearProgressIndicator(
-                      value: _answers.length / roundLength,
-                      minHeight: 12,
-                      color: Palette.marigold,
-                      backgroundColor: Palette.nightDeep,
-                    ),
-                  ),
-                ),
+                Expanded(child: SoftProgress(_answers.length / roundLength)),
                 const SizedBox(width: 12),
                 Directionality(
                   textDirection: TextDirection.ltr,
                   child: Text('${min(_answers.length + 1, roundLength)} / $roundLength',
-                      style: rubik(18, weight: FontWeight.w600)),
+                      style: rubik(16, weight: FontWeight.w600, color: Palette.inkSoft)),
                 ),
                 const SizedBox(width: 12),
               ]),
             ),
             Otto(
-              size: compact ? 100 : 130,
+              size: compact ? 96 : 124,
               balls: _balls,
               mood: _feedback == _Feedback.correct
                   ? OttoMood.cheering
@@ -190,15 +189,17 @@ class _PracticeScreenState extends State<PracticeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Wobble(
                 trigger: _wobble,
-                child: Container(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
                   decoration: BoxDecoration(
-                    color: Palette.cream,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(28),
+                    boxShadow: softShadow,
                     border: Border.all(
-                      color: _feedback == _Feedback.correct ? Palette.mint : Colors.transparent,
-                      width: 4,
+                      color: _feedback == _Feedback.correct ? Palette.mint : Colors.white,
+                      width: 3,
                     ),
                   ),
                   // Equations always read left-to-right, also in Hebrew.
@@ -209,20 +210,20 @@ class _PracticeScreenState extends State<PracticeScreen> {
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
                         Text('${_problem.question} = ',
                             key: const ValueKey('question'),
-                            style: rubik(48, weight: FontWeight.w700, color: Palette.ink)),
+                            style: rubik(46, weight: FontWeight.w800)),
                         Container(
-                          constraints: const BoxConstraints(minWidth: 90),
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          constraints: const BoxConstraints(minWidth: 96),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                           decoration: BoxDecoration(
-                            border: Border(
-                                bottom: BorderSide(color: Palette.violet, width: 4)),
+                            color: Palette.lilac,
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
                             _feedback == _Feedback.reveal ? '${_problem.answer}' : (_input.isEmpty ? ' ' : _input),
                             key: const ValueKey('answer'),
                             textAlign: TextAlign.center,
-                            style: rubik(48,
-                                weight: FontWeight.w700,
+                            style: rubik(46,
+                                weight: FontWeight.w800,
                                 color: _feedback == _Feedback.reveal ? Palette.violet : Palette.ink),
                           ),
                         ),
@@ -233,7 +234,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
               ),
             ),
             SizedBox(
-              height: 36,
+              height: 40,
               child: Center(
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   if (_feedback == _Feedback.correct)
@@ -241,21 +242,26 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   if (_feedback == _Feedback.almost || _feedback == _Feedback.reveal)
                     const Icon(Icons.lightbulb_rounded, color: Palette.coral),
                   const SizedBox(width: 6),
-                  Text(feedbackText, style: rubik(22, weight: FontWeight.w700, color: feedbackColor)),
+                  Flexible(child: Text(feedbackText, style: rubik(20, weight: FontWeight.w700, color: feedbackColor))),
                 ]),
               ),
             ),
             if (_showHint)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Palette.sun.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(18),
+                ),
                 child: Directionality(
                   textDirection: TextDirection.ltr,
-                  child: Column(children: [
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
                     for (final step in _problem.hintSteps)
                       FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(step,
-                            style: rubik(20, weight: FontWeight.w600, color: Palette.marigold)),
+                            style: rubik(19, weight: FontWeight.w600, color: const Color(0xFF9A6200))),
                       ),
                   ]),
                 ),
@@ -263,8 +269,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
             else
               TextButton.icon(
                 onPressed: _busy ? null : () => setState(() => _showHint = true),
-                icon: const Icon(Icons.lightbulb_outline_rounded, color: Palette.marigold),
-                label: Text(l.hint, style: rubik(20, weight: FontWeight.w600, color: Palette.marigold)),
+                icon: const Icon(Icons.lightbulb_outline_rounded, color: Palette.violet),
+                label: Text(l.hint, style: rubik(18, weight: FontWeight.w600, color: Palette.violet)),
               ),
             const Spacer(),
             ConstrainedBox(

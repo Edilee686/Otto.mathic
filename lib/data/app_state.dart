@@ -63,6 +63,17 @@ class AppState extends ChangeNotifier {
     current = profiles.where((p) => p.id == id).firstOrNull;
   }
 
+  /// Unlocks a Trick Book card; returns true the first time.
+  Future<bool> unlockCard(String id) async {
+    final t = current!.trick(id);
+    t.practisedCount++;
+    final isNew = !t.unlocked;
+    t.unlocked = true;
+    await _save();
+    notifyListeners();
+    return isNew;
+  }
+
   Future<void> _save() async {
     await _prefs.setString(_kProfiles, jsonEncode(profiles.map((p) => p.toJson()).toList()));
     if (current != null) await _prefs.setString(_kCurrent, current!.id);
@@ -123,7 +134,7 @@ class AppState extends ChangeNotifier {
     final stars = starsFor(correct, answers.length);
     final coins = correct;
     p.coins += coins;
-    if (skill == SkillId.trickX11) {
+    if (trickSkills.contains(skill)) {
       final t = p.trick(skill.name);
       t.practisedCount++;
       final newlyUnlocked = !t.unlocked && correct >= trickUnlockCorrect;
@@ -159,6 +170,9 @@ class AppState extends ChangeNotifier {
         levelDelta: change.delta);
   }
 }
+
+/// Card ids for magic that is not a practice round (e.g. mind reading).
+const mindAlways5Card = 'mindAlways5';
 
 class AppScope extends InheritedNotifier<AppState> {
   const AppScope({super.key, required AppState state, required super.child})

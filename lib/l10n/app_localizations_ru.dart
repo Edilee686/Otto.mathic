@@ -72,8 +72,8 @@ class AppLocalizationsRu extends AppLocalizations {
       'Умножай двузначное число на 11 в одно мгновение!';
 
   @override
-  String trickIntro(int a) {
-    return 'Смотри, я посчитаю $a × 11 быстрее калькулятора!';
+  String trickIntro(String problem) {
+    return 'Смотри, я посчитаю $problem быстрее калькулятора!';
   }
 
   @override
@@ -159,4 +159,130 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get language => 'Язык';
+
+  @override
+  String get trickX5Title => 'Фокус «×5»';
+
+  @override
+  String get trickX5Tagline => 'Умножь на 10 и возьми половину!';
+
+  @override
+  String get x5Step1 => 'Сначала умножь на 10: просто допиши ноль.';
+
+  @override
+  String get x5Step2 => 'Теперь возьми половину.';
+
+  @override
+  String get x5Step3 => 'Это и есть ответ. Абракадабра!';
+
+  @override
+  String get x5Rule => 'Проще всего с чётными числами.';
+
+  @override
+  String get magicShow => 'Магическое шоу';
+
+  @override
+  String get mindTitle => 'Отто читает мысли';
+
+  @override
+  String get mindTagline => 'Задумай число, а Отто угадает ответ!';
+
+  @override
+  String get mindPrediction => 'Я спрятал свой ответ под шляпой!';
+
+  @override
+  String get mindThink =>
+      'Задумай число от 1 до 20 и введи его. Я закрываю глаза!';
+
+  @override
+  String get mindDouble => 'Удвой своё число. Что получилось?';
+
+  @override
+  String mindAdd(int n) {
+    return 'Прибавь $n. Что получилось?';
+  }
+
+  @override
+  String get mindHalve => 'Теперь возьми половину. Что получилось?';
+
+  @override
+  String get mindSubtract => 'Отними задуманное число. Что осталось?';
+
+  @override
+  String mindReveal(int k) {
+    return 'Получилось $k! Заглянем под шляпу...';
+  }
+
+  @override
+  String get mindRange => 'Выбери число от 1 до 20.';
+
+  @override
+  String get howItWorks => 'Как это работает?';
+
+  @override
+  String get mindHow1 =>
+      'Твоё тайное число — это мешок с шариками. Удвоение даёт два мешка.';
+
+  @override
+  String mindHow2(int n) {
+    return 'Прибавляем $n: рядом с мешками появляются отдельные шарики, их $n.';
+  }
+
+  @override
+  String mindHow3(int k) {
+    return 'Половина — это один мешок и ещё $k в сторонке.';
+  }
+
+  @override
+  String mindHow4(int k) {
+    return 'Отнимаем задуманное число, и мешок исчезает. Всегда остаётся $k, какое бы число ни было задумано!';
+  }
+
+  @override
+  String get performIt => 'Показать фокус семье';
+
+  @override
+  String get showTime => 'Время шоу!';
+
+  @override
+  String get showTimeIntro => 'Покажи фокус семье! Прочитай вслух:';
+
+  @override
+  String get scriptThink => 'Задумай число.';
+
+  @override
+  String get scriptDouble => 'Удвой его.';
+
+  @override
+  String scriptAdd(int n) {
+    return 'Прибавь $n.';
+  }
+
+  @override
+  String get scriptHalve => 'Возьми половину.';
+
+  @override
+  String get scriptSubtract => 'Отними задуманное число.';
+
+  @override
+  String scriptReveal(int k) {
+    return 'Получилось $k!';
+  }
+
+  @override
+  String get circusGames => 'Цирковые игры';
+
+  @override
+  String get jugglerTitle => 'Шарики жонглёра';
+
+  @override
+  String get jugglerTagline => 'Найди шарик, который дополняет до 10!';
+
+  @override
+  String jugglerAsk(int target) {
+    return 'Какой шарик дополняет до $target?';
+  }
+
+  @override
+  String get done => 'Готово';
 }

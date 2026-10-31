@@ -7,6 +7,7 @@ import '../widgets/common.dart';
 import '../widgets/otto.dart';
 
 const _languageNames = {'en': 'English', 'he': 'עברית', 'ru': 'Русский'};
+const _languageHints = {'en': 'EN', 'he': 'HE', 'ru': 'RU'};
 
 /// Screen 2a: three big language buttons. The heading shows in all three
 /// languages because the child has not picked one yet.
@@ -16,45 +17,62 @@ class LanguageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
-    final headings = supportedLanguages
-        .map((l) => lookupAppLocalizations(Locale(l)).chooseLanguage)
-        .join('  ·  ');
-    return Scaffold(
+    return AppScaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              if (state.onboarding)
-                Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 32),
-                    onPressed: state.cancelNewPlayer,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                if (state.onboarding)
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: IconButton(
+                      tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                      icon: const Icon(Icons.close_rounded, size: 30),
+                      onPressed: state.cancelNewPlayer,
+                    ),
                   ),
-                ),
-              const Otto(size: 170),
-              const SizedBox(height: 16),
-              Text(headings,
-                  textAlign: TextAlign.center, style: rubik(20, weight: FontWeight.w600)),
-              const SizedBox(height: 28),
-              for (final lang in supportedLanguages)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: SizedBox(
-                    width: 300,
-                    child: FilledButton(
+                const Otto(size: 170),
+                const SizedBox(height: 8),
+                Text(lookupAppLocalizations(const Locale('en')).appTitle,
+                    style: rubik(30, weight: FontWeight.w800, color: Palette.violetDeep)),
+                const SizedBox(height: 6),
+                for (final l in supportedLanguages)
+                  Text(lookupAppLocalizations(Locale(l)).chooseLanguage,
+                      textAlign: TextAlign.center,
+                      style: rubik(17, color: Palette.inkSoft, height: 1.4)),
+                const SizedBox(height: 24),
+                for (final lang in supportedLanguages)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: SoftCard(
                       key: ValueKey('lang-$lang'),
-                      onPressed: () {
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      onTap: () {
                         state.chooseLanguage(lang);
                         Navigator.of(context).push(
                             MaterialPageRoute(builder: (_) => const NameScreen()));
                       },
-                      child: Text(_languageNames[lang]!),
+                      child: Semantics(
+                        button: true,
+                        label: _languageNames[lang],
+                        excludeSemantics: true,
+                        child: Row(children: [
+                          SymbolTile(_languageHints[lang]!, color: Palette.violet, size: 48),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Text(_languageNames[lang]!,
+                                style: rubik(24, weight: FontWeight.w700)),
+                          ),
+                          Icon(Directionality.of(context) == TextDirection.rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, color: Palette.inkSoft),
+                        ]),
+                      ),
                     ),
                   ),
-                ),
-            ]),
+              ]),
+            ),
           ),
         ),
       ),
@@ -90,8 +108,8 @@ class _NameScreenState extends State<NameScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final ok = _name.text.trim().isNotEmpty;
-    return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.transparent),
+    return AppScaffold(
+      appBar: AppBar(),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -109,23 +127,23 @@ class _NameScreenState extends State<NameScreen> {
                   maxLength: 16,
                   textAlign: TextAlign.center,
                   textCapitalization: TextCapitalization.words,
-                  style: rubik(28, weight: FontWeight.w600, color: Palette.ink),
+                  style: rubik(26, weight: FontWeight.w600),
                   decoration: InputDecoration(hintText: l.nameHint, counterText: ''),
                   onChanged: (_) => setState(() {}),
                   onSubmitted: (_) => ok ? _go() : null,
                 ),
                 const SizedBox(height: 24),
-                Text(l.pickBuddy, style: rubik(20, weight: FontWeight.w600)),
-                const SizedBox(height: 12),
+                Text(l.pickBuddy, style: rubik(18, weight: FontWeight.w600, color: Palette.inkSoft)),
+                const SizedBox(height: 14),
                 Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
+                  spacing: 14,
+                  runSpacing: 14,
                   alignment: WrapAlignment.center,
                   children: [
                     for (var i = 0; i < buddies.length; i++)
                       GestureDetector(
                         onTap: () => setState(() => _buddy = i),
-                        child: BuddyAvatar(i, size: 72, selected: i == _buddy),
+                        child: BuddyAvatar(i, size: 68, selected: i == _buddy),
                       ),
                   ],
                 ),
@@ -154,9 +172,20 @@ class ProfilePickerScreen extends StatelessWidget {
     final state = AppScope.of(context);
     // Picker text follows the most recently created profile's language.
     final l = lookupAppLocalizations(state.profiles.last.locale);
+    Widget tile(Widget avatar, String name, VoidCallback onTap) => SizedBox(
+          width: 140,
+          child: SoftCard(
+            onTap: onTap,
+            child: Column(children: [
+              avatar,
+              const SizedBox(height: 10),
+              Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: rubik(19, weight: FontWeight.w700)),
+            ]),
+          ),
+        );
     return Directionality(
       textDirection: state.profiles.last.language == 'he' ? TextDirection.rtl : TextDirection.ltr,
-      child: Scaffold(
+      child: AppScaffold(
         body: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -164,45 +193,25 @@ class ProfilePickerScreen extends StatelessWidget {
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 const Otto(size: 140),
                 const SizedBox(height: 12),
-                Text(l.whoIsPlaying, style: rubik(26, weight: FontWeight.w700)),
+                Text(l.whoIsPlaying, style: rubik(26, weight: FontWeight.w800)),
                 const SizedBox(height: 24),
                 Wrap(
-                  spacing: 20,
-                  runSpacing: 20,
+                  spacing: 16,
+                  runSpacing: 16,
                   alignment: WrapAlignment.center,
                   children: [
                     for (final p in state.profiles)
-                      InkWell(
-                        borderRadius: BorderRadius.circular(20),
-                        onTap: () => state.selectProfile(p),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Column(children: [
-                            BuddyAvatar(p.avatarId, size: 88),
-                            const SizedBox(height: 8),
-                            Text(p.name, style: rubik(22, weight: FontWeight.w600)),
-                          ]),
-                        ),
-                      ),
+                      tile(BuddyAvatar(p.avatarId, size: 76), p.name, () => state.selectProfile(p)),
                     if (state.canAddProfile)
-                      InkWell(
-                        borderRadius: BorderRadius.circular(20),
-                        onTap: state.startNewPlayer,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Column(children: [
-                            Container(
-                              width: 88,
-                              height: 88,
-                              decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: Palette.cream, width: 3)),
-                              child: const Icon(Icons.add_rounded, size: 48),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(l.newPlayer, style: rubik(22, weight: FontWeight.w600)),
-                          ]),
+                      tile(
+                        Container(
+                          width: 76,
+                          height: 76,
+                          decoration: const BoxDecoration(shape: BoxShape.circle, color: Palette.lilac),
+                          child: const Icon(Icons.add_rounded, size: 40, color: Palette.violet),
                         ),
+                        l.newPlayer,
+                        state.startNewPlayer,
                       ),
                   ],
                 ),

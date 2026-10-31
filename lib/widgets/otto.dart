@@ -17,7 +17,7 @@ class Otto extends StatefulWidget {
   State<Otto> createState() => _OttoState();
 }
 
-enum OttoMood { happy, thinking, cheering }
+enum OttoMood { happy, thinking, cheering, eyesClosed }
 
 class _OttoState extends State<Otto> with SingleTickerProviderStateMixin {
   late final AnimationController _c =
@@ -65,9 +65,11 @@ class _OttoPainter extends CustomPainter {
   final OttoMood mood;
 
   static const _ballColors = [
-    Palette.marigold, Palette.mint, Palette.coral, Color(0xFF7FC8F8),
-    Palette.cream, Color(0xFFFF9ED2), Color(0xFFB8E986), Color(0xFFFFD86B),
+    Palette.sun, Palette.mint, Palette.coral, Palette.sky,
+    Palette.pink, Palette.violet, Color(0xFF9BE07A), Color(0xFFFFD86B),
   ];
+  static const _bodyLight = Color(0xFFA38BFF);
+  static const _armDark = Color(0xFF6A4BE0);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -88,8 +90,13 @@ class _OttoPainter extends CustomPainter {
           Paint()..color = _ballColors[i % _ballColors.length]);
     }
 
+    // Soft shadow on the floor.
+    canvas.drawOval(
+        Rect.fromCenter(center: Offset(cx, headY + r * 1.62), width: w * 0.7, height: w * 0.07),
+        Paint()..color = Palette.violetDeep.withValues(alpha: 0.12));
+
     final body = Paint()..color = Palette.violet;
-    final bodyDark = Paint()..color = const Color(0xFF7354C0);
+    final bodyDark = Paint()..color = _armDark;
 
     // Eight wavy arms.
     for (var i = 0; i < 8; i++) {
@@ -110,21 +117,35 @@ class _OttoPainter extends CustomPainter {
       canvas.drawCircle(Offset(endX, endY), w * 0.022, i.isEven ? body : bodyDark);
     }
 
-    // Head.
+    // Head with a soft highlight.
+    final headRect = Rect.fromCenter(center: Offset(cx, headY), width: r * 2.1, height: r * 1.9);
     canvas.drawOval(
-        Rect.fromCenter(center: Offset(cx, headY), width: r * 2.1, height: r * 1.9), body);
+        headRect,
+        Paint()
+          ..shader = const RadialGradient(
+            center: Alignment(-0.35, -0.45),
+            radius: 0.9,
+            colors: [_bodyLight, Palette.violet],
+          ).createShader(headRect));
     // Cheeks.
-    final cheek = Paint()..color = const Color(0xFFFF9ED2).withValues(alpha: 0.6);
+    final cheek = Paint()..color = Palette.pink.withValues(alpha: 0.55);
     canvas.drawCircle(Offset(cx - r * 0.62, headY + r * 0.28), r * 0.14, cheek);
     canvas.drawCircle(Offset(cx + r * 0.62, headY + r * 0.28), r * 0.14, cheek);
 
     // Eyes (blink now and then).
     final blink = (t > 0.92 && t < 0.97);
     final white = Paint()..color = Colors.white;
-    final pupil = Paint()..color = Palette.nightDeep;
+    final pupil = Paint()..color = Palette.ink;
     for (final dx in [-0.36, 0.36]) {
       final c = Offset(cx + r * dx, headY - r * 0.02);
-      if (blink) {
+      if (mood == OttoMood.eyesClosed) {
+        canvas.drawArc(Rect.fromCenter(center: c, width: r * 0.36, height: r * 0.26), pi, pi, false,
+            Paint()
+              ..color = Palette.ink
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = w * 0.016
+              ..strokeCap = StrokeCap.round);
+      } else if (blink) {
         canvas.drawLine(c.translate(-r * 0.16, 0), c.translate(r * 0.16, 0),
             pupil..strokeWidth = w * 0.015);
       } else {
@@ -137,14 +158,14 @@ class _OttoPainter extends CustomPainter {
 
     // Mouth.
     final mouth = Paint()
-      ..color = Palette.nightDeep
+      ..color = Palette.ink
       ..style = PaintingStyle.stroke
       ..strokeWidth = w * 0.018
       ..strokeCap = StrokeCap.round;
     final mouthRect =
         Rect.fromCenter(center: Offset(cx, headY + r * 0.3), width: r * 0.6, height: r * 0.4);
     if (mood == OttoMood.cheering) {
-      canvas.drawArc(mouthRect, 0, pi, true, Paint()..color = Palette.nightDeep);
+      canvas.drawArc(mouthRect, 0, pi, true, Paint()..color = Palette.ink);
     } else if (mood == OttoMood.thinking) {
       canvas.drawLine(Offset(cx - r * 0.15, headY + r * 0.42),
           Offset(cx + r * 0.15, headY + r * 0.38), mouth);
@@ -159,14 +180,14 @@ class _OttoPainter extends CustomPainter {
     canvas.save();
     canvas.translate(cx + r * 0.15, hatBottom);
     canvas.rotate(tilt);
-    final hat = Paint()..color = Palette.nightDeep;
+    final hat = Paint()..color = Palette.ink;
     canvas.drawRRect(
         RRect.fromRectAndRadius(
             Rect.fromLTWH(-hatW * 0.85, -r * 0.08, hatW * 1.7, r * 0.16), Radius.circular(r * 0.08)),
         hat);
     canvas.drawRect(Rect.fromLTWH(-hatW / 2, -hatH, hatW, hatH), hat);
     canvas.drawRect(Rect.fromLTWH(-hatW / 2, -r * 0.3, hatW, r * 0.18),
-        Paint()..color = Palette.marigold);
+        Paint()..color = Palette.sun);
     _star(canvas, Offset(-hatW * 0.18, -hatH * 0.62), r * 0.11);
     _star(canvas, Offset(hatW * 0.22, -hatH * 0.8), r * 0.07);
     canvas.restore();
@@ -181,7 +202,7 @@ class _OttoPainter extends CustomPainter {
       i == 0 ? path.moveTo(p.dx, p.dy) : path.lineTo(p.dx, p.dy);
     }
     path.close();
-    canvas.drawPath(path, Paint()..color = Palette.marigold);
+    canvas.drawPath(path, Paint()..color = Palette.sun);
   }
 
   @override

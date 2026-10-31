@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:number_tricksters/logic/generators.dart';
+import 'package:number_tricksters/logic/mind_magic.dart';
 import 'package:number_tricksters/logic/problem.dart';
 
 int calc(Problem p) => switch (p.op) {
@@ -20,7 +21,11 @@ void main() {
         final gen = SkillGenerator.forSkill(skill, random);
         for (var i = 0; i < 1000; i++) {
           final p = gen.generate(level);
-          expect(p.answer, calc(p), reason: '$p');
+          if (skill == SkillId.makeTen) {
+            expect(p.a + p.answer, p.b, reason: 'complement: $p');
+          } else {
+            expect(p.answer, calc(p), reason: '$p');
+          }
           expect(p.answer, greaterThanOrEqualTo(0), reason: '$p');
           expect(p.a, greaterThanOrEqualTo(0), reason: '$p');
           expect(p.b, greaterThanOrEqualTo(0), reason: '$p');
@@ -80,6 +85,45 @@ void main() {
       expect(p.a, inInclusiveRange(10, 99));
       expect(t + o, lessThanOrEqualTo(9));
       expect(p.answer, int.parse('$t${t + o}$o'));
+    }
+  });
+
+  test('×5 trick uses even two-digit numbers', () {
+    final g = TimesFiveGenerator(random);
+    for (var i = 0; i < 1000; i++) {
+      final p = g.generate(1);
+      expect(p.a.isEven, isTrue);
+      expect(p.a, inInclusiveRange(12, 98));
+      expect(p.answer, p.a * 10 ~/ 2);
+    }
+  });
+
+  test("Juggler's Balls: targets per level and 4 distinct valid choices", () {
+    final g = MakeTenGenerator(random);
+    for (var level = 1; level <= maxLevel; level++) {
+      for (var i = 0; i < 1000; i++) {
+        final p = g.generate(level);
+        expect(p.b, MakeTenGenerator.targetFor(level));
+        expect(p.answer, greaterThan(0));
+        final c = g.choices(p);
+        expect(c.length, 4);
+        expect(c.toSet().length, 4);
+        expect(c, contains(p.answer));
+        expect(c.every((x) => x > 0 && x < p.b), isTrue, reason: '$p $c');
+      }
+    }
+  });
+
+  test('Always 5: the result is k for every secret number', () {
+    for (var k = 2; k <= 9; k++) {
+      final m = MindMagic(k);
+      for (var n = MindMagic.minSecret; n <= MindMagic.maxSecret; n++) {
+        final steps = m.expected(n);
+        expect(steps[0], 2 * n);
+        expect(steps[1], 2 * n + 2 * k);
+        expect(steps[2] * 2, steps[1], reason: 'halving is exact');
+        expect(steps[3], k);
+      }
     }
   });
 }

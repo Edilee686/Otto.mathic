@@ -6,10 +6,14 @@ import '../logic/generators.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../widgets/otto.dart';
+import 'juggler_screen.dart';
+import 'mind_magic_screens.dart';
 import 'practice_screen.dart';
+import 'results_screen.dart' show TrickCardTile;
 import 'trick_screens.dart';
 
-/// Home: a short circus route. Every game is two taps away.
+/// Home: Otto's greeting, then Trick School, Magic Show, Circus Games and
+/// Juggling Practice. Every game is two taps away.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -18,80 +22,148 @@ class HomeScreen extends StatelessWidget {
     final state = AppScope.of(context);
     final p = state.current!;
     final l = AppLocalizations.of(context);
-    final trick = p.trick(SkillId.trickX11.name);
+    void open(Widget screen) =>
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
 
     final ops = [
       (SkillId.add, l.addition, '+', Palette.mint),
       (SkillId.sub, l.subtraction, '−', Palette.coral),
       (SkillId.mul, l.multiplication, '×', Palette.violet),
-      (SkillId.div, l.division, '÷', const Color(0xFF7FC8F8)),
+      (SkillId.div, l.division, '÷', Palette.sky),
+    ];
+    final cards = [
+      for (final t in tricks) (t.symbol, t.title(l), p.trick(t.skill.name).unlocked),
+      ('?', l.mindTitle, p.trick(mindAlways5Card).unlocked),
     ];
 
-    return Scaffold(
+    return AppScaffold(
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
           children: [
             Row(children: [
-              BuddyAvatar(p.avatarId, size: 52),
-              const Spacer(),
+              BuddyAvatar(p.avatarId, size: 50),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(p.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: rubik(20, weight: FontWeight.w700)),
+              ),
               CoinBadge(p.coins),
               IconButton(
                 tooltip: l.switchPlayer,
-                icon: const Icon(Icons.people_alt_rounded, size: 30),
+                icon: const Icon(Icons.people_alt_rounded, size: 28, color: Palette.inkSoft),
                 onPressed: state.signOut,
               ),
             ]),
-            const SizedBox(height: 8),
-            Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              const Otto(size: 110),
-              const SizedBox(width: 8),
-              Expanded(child: SpeechBubble(l.hello(p.name), size: 20)),
-            ]),
-            const SizedBox(height: 24),
-            _SectionTitle(l.trickSchool, Icons.auto_awesome_rounded),
-            _Tent(
-              color: Palette.marigold,
-              symbol: '×11',
-              title: l.trickX11Title,
-              subtitle: l.trickX11Tagline,
-              stars: p.skill(SkillId.trickX11.name).bestStars,
-              onTap: () => Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => const TrickDemoScreen())),
+            const SizedBox(height: 12),
+            // Hero card: Otto says hello.
+            Container(
+              padding: const EdgeInsets.fromLTRB(12, 12, 20, 12),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
+                  colors: [Color(0xFF9B82FF), Palette.violet],
+                ),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: softShadow,
+              ),
+              child: Row(children: [
+                const Otto(size: 100),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(l.hello(p.name),
+                      style: rubik(21, weight: FontWeight.w700, color: Colors.white, height: 1.3)),
+                ),
+              ]),
             ),
             const SizedBox(height: 24),
-            _SectionTitle(l.jugglingPractice, Icons.sports_handball_rounded),
+            SectionTitle(l.trickSchool, Icons.auto_awesome_rounded),
+            for (final t in tricks)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _WideTile(
+                  key: ValueKey('trick-${t.skill.name}'),
+                  symbol: t.symbol,
+                  color: t.color,
+                  title: t.title(l),
+                  subtitle: t.tagline(l),
+                  stars: p.skill(t.skill.name).bestStars,
+                  onTap: () => open(TrickDemoScreen(trick: t)),
+                ),
+              ),
+            const SizedBox(height: 12),
+            SectionTitle(l.magicShow, Icons.psychology_alt_rounded, color: Palette.pink),
+            _WideTile(
+              key: const ValueKey('mind-magic'),
+              symbol: '?',
+              color: Palette.pink,
+              title: l.mindTitle,
+              subtitle: l.mindTagline,
+              onTap: () => open(const MindMagicScreen()),
+            ),
+            const SizedBox(height: 24),
+            SectionTitle(l.circusGames, Icons.celebration_rounded, color: Palette.sky),
+            _WideTile(
+              key: const ValueKey('juggler'),
+              symbol: '10',
+              color: Palette.sky,
+              title: l.jugglerTitle,
+              subtitle: l.jugglerTagline,
+              stars: p.skill(SkillId.makeTen.name).bestStars,
+              level: l.level(p.skill(SkillId.makeTen.name).level),
+              onTap: () => open(const JugglerScreen()),
+            ),
+            const SizedBox(height: 24),
+            SectionTitle(l.jugglingPractice, Icons.sports_handball_rounded, color: Palette.mint),
             GridView.count(
               crossAxisCount: 2,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
-              childAspectRatio: 1.05,
+              childAspectRatio: 1.15,
               children: [
                 for (final (id, name, sym, color) in ops)
-                  _OpTent(
+                  SoftCard(
                     key: ValueKey('op-${id.name}'),
-                    name: name,
-                    symbol: sym,
-                    color: color,
-                    level: p.skill(id.name).level,
-                    stars: p.skill(id.name).bestStars,
-                    onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => PracticeScreen(skill: id))),
+                    padding: const EdgeInsets.all(12),
+                    onTap: () => open(PracticeScreen(skill: id)),
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      SymbolTile(sym, color: color, size: 56),
+                      const SizedBox(height: 8),
+                      FittedBox(child: Text(name, style: rubik(18, weight: FontWeight.w700))),
+                      const SizedBox(height: 2),
+                      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        Text(l.level(p.skill(id.name).level),
+                            style: rubik(13, color: Palette.inkSoft)),
+                        const SizedBox(width: 6),
+                        StarRow(p.skill(id.name).bestStars, size: 15),
+                      ]),
+                    ]),
                   ),
               ],
             ),
             const SizedBox(height: 24),
-            _SectionTitle(l.trickBook, Icons.menu_book_rounded),
+            SectionTitle(l.trickBook, Icons.menu_book_rounded, color: Palette.sun),
             SizedBox(
-              height: 130,
+              height: 136,
               child: ListView(
                 scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
                 children: [
-                  _TrickCard(unlocked: trick.unlocked, symbol: '×11', title: l.trickX11Title, lockedText: l.locked),
-                  for (var i = 0; i < 5; i++)
-                    _TrickCard(unlocked: false, symbol: '?', title: '', lockedText: l.locked),
+                  for (final (symbol, title, unlocked) in cards)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 12),
+                      child: TrickCardTile(symbol: symbol, title: unlocked ? title : l.locked, unlocked: unlocked),
+                    ),
+                  for (var i = 0; i < 3; i++)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 12),
+                      child: TrickCardTile(symbol: '?', title: l.locked, unlocked: false),
+                    ),
                 ],
               ),
             ),
@@ -102,127 +174,39 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text, this.icon);
-  final String text;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Row(children: [
-          Icon(icon, color: Palette.marigold),
-          const SizedBox(width: 8),
-          Expanded(child: Text(text, style: rubik(22, weight: FontWeight.w700))),
-        ]),
-      );
-}
-
-class _Tent extends StatelessWidget {
-  const _Tent({required this.color, required this.symbol, required this.title, required this.subtitle, required this.stars, required this.onTap});
-  final Color color;
+class _WideTile extends StatelessWidget {
+  const _WideTile({super.key, required this.symbol, required this.color, required this.title, required this.subtitle, required this.onTap, this.stars, this.level});
   final String symbol, title, subtitle;
-  final int stars;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Palette.cream,
-      borderRadius: BorderRadius.circular(24),
-      child: InkWell(
-        key: const ValueKey('trick-x11'),
-        borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(children: [
-            Container(
-              width: 76,
-              height: 76,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(18)),
-              child: Text(symbol, textDirection: TextDirection.ltr, style: rubik(28, weight: FontWeight.w800, color: Palette.ink)),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(title, style: rubik(22, weight: FontWeight.w700, color: Palette.ink)),
-                const SizedBox(height: 4),
-                Text(subtitle, style: rubik(16, color: Palette.ink.withValues(alpha: 0.75))),
-                const SizedBox(height: 6),
-                StarRow(stars),
-              ]),
-            ),
-          ]),
-        ),
-      ),
-    );
-  }
-}
-
-class _OpTent extends StatelessWidget {
-  const _OpTent({super.key, required this.name, required this.symbol, required this.color, required this.level, required this.stars, required this.onTap});
-  final String name, symbol;
   final Color color;
-  final int level, stars;
+  final int? stars;
+  final String? level;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return Material(
-      color: Palette.cream,
-      borderRadius: BorderRadius.circular(24),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: color,
-              child: Text(symbol, style: rubik(36, weight: FontWeight.w800, color: Palette.ink)),
-            ),
-            const SizedBox(height: 8),
-            FittedBox(child: Text(name, style: rubik(19, weight: FontWeight.w700, color: Palette.ink))),
-            Text(l.level(level), style: rubik(15, color: Palette.ink.withValues(alpha: 0.7))),
-            StarRow(stars, size: 18),
+    return SoftCard(
+      onTap: onTap,
+      child: Row(children: [
+        SymbolTile(symbol, color: color, size: 68),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title, style: rubik(19, weight: FontWeight.w700)),
+            const SizedBox(height: 3),
+            Text(subtitle, style: rubik(14.5, color: Palette.inkSoft, height: 1.3)),
+            if (stars != null || level != null) ...[
+              const SizedBox(height: 6),
+              Row(children: [
+                if (level != null) ...[
+                  Text(level!, style: rubik(13, color: Palette.inkSoft)),
+                  const SizedBox(width: 6),
+                ],
+                if (stars != null) StarRow(stars!, size: 16),
+              ]),
+            ],
           ]),
         ),
-      ),
-    );
-  }
-}
-
-class _TrickCard extends StatelessWidget {
-  const _TrickCard({required this.unlocked, required this.symbol, required this.title, required this.lockedText});
-  final bool unlocked;
-  final String symbol, title, lockedText;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 100,
-      margin: const EdgeInsetsDirectional.only(end: 12),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: unlocked ? Palette.violet : Palette.nightDeep,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: unlocked ? Palette.marigold : Palette.violet.withValues(alpha: 0.4), width: 3),
-      ),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Icon(unlocked ? Icons.auto_awesome_rounded : Icons.lock_rounded,
-            color: unlocked ? Palette.marigold : Palette.violet),
-        const SizedBox(height: 4),
-        Text(symbol, textDirection: TextDirection.ltr, style: rubik(24, weight: FontWeight.w800)),
-        const SizedBox(height: 2),
-        Text(unlocked ? title : lockedText,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: rubik(12)),
+        Icon(Directionality.of(context) == TextDirection.rtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, color: Palette.inkSoft),
       ]),
     );
   }

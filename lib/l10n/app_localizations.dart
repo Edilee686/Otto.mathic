@@ -217,8 +217,8 @@ abstract class AppLocalizations {
   /// No description provided for @trickIntro.
   ///
   /// In en, this message translates to:
-  /// **'Watch me do {a} × 11 faster than a calculator!'**
-  String trickIntro(int a);
+  /// **'Watch me do {problem} faster than a calculator!'**
+  String trickIntro(String problem);
 
   /// No description provided for @trickStep1.
   ///
@@ -375,6 +375,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get language;
+
+  /// No description provided for @trickX5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'The ×5 Trick'**
+  String get trickX5Title;
+
+  /// No description provided for @trickX5Tagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiply by 10, then take half!'**
+  String get trickX5Tagline;
+
+  /// No description provided for @x5Step1.
+  ///
+  /// In en, this message translates to:
+  /// **'First multiply by 10: just add a zero.'**
+  String get x5Step1;
+
+  /// No description provided for @x5Step2.
+  ///
+  /// In en, this message translates to:
+  /// **'Now take half.'**
+  String get x5Step2;
+
+  /// No description provided for @x5Step3.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s the answer. Abracadabra!'**
+  String get x5Step3;
+
+  /// No description provided for @x5Rule.
+  ///
+  /// In en, this message translates to:
+  /// **'Easiest with even numbers.'**
+  String get x5Rule;
+
+  /// No description provided for @magicShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Magic Show'**
+  String get magicShow;
+
+  /// No description provided for @mindTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Otto Reads Minds'**
+  String get mindTitle;
+
+  /// No description provided for @mindTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Think of a number and Otto will guess the answer!'**
+  String get mindTagline;
+
+  /// No description provided for @mindPrediction.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve hidden my prediction under my hat!'**
+  String get mindPrediction;
+
+  /// No description provided for @mindThink.
+  ///
+  /// In en, this message translates to:
+  /// **'Think of a number from 1 to 20 and type it. I\'m covering my eyes!'**
+  String get mindThink;
+
+  /// No description provided for @mindDouble.
+  ///
+  /// In en, this message translates to:
+  /// **'Double your number. What do you get?'**
+  String get mindDouble;
+
+  /// No description provided for @mindAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {n}. What do you get?'**
+  String mindAdd(int n);
+
+  /// No description provided for @mindHalve.
+  ///
+  /// In en, this message translates to:
+  /// **'Now take half. What do you get?'**
+  String get mindHalve;
+
+  /// No description provided for @mindSubtract.
+  ///
+  /// In en, this message translates to:
+  /// **'Take away the number you first thought of. What\'s left?'**
+  String get mindSubtract;
+
+  /// No description provided for @mindReveal.
+  ///
+  /// In en, this message translates to:
+  /// **'You got {k}! Let\'s peek under the hat...'**
+  String mindReveal(int k);
+
+  /// No description provided for @mindRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a number from 1 to 20.'**
+  String get mindRange;
+
+  /// No description provided for @howItWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How does it work?'**
+  String get howItWorks;
+
+  /// No description provided for @mindHow1.
+  ///
+  /// In en, this message translates to:
+  /// **'Your secret number is a bag of balls. Doubling it makes two bags.'**
+  String get mindHow1;
+
+  /// No description provided for @mindHow2.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding {n} puts {n} loose balls next to the bags.'**
+  String mindHow2(int n);
+
+  /// No description provided for @mindHow3.
+  ///
+  /// In en, this message translates to:
+  /// **'Taking half leaves one bag and {k} loose balls.'**
+  String mindHow3(int k);
+
+  /// No description provided for @mindHow4.
+  ///
+  /// In en, this message translates to:
+  /// **'Taking away your number removes the bag, so {k} is always left, whatever you picked!'**
+  String mindHow4(int k);
+
+  /// No description provided for @performIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Perform it for your family'**
+  String get performIt;
+
+  /// No description provided for @showTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Time!'**
+  String get showTime;
+
+  /// No description provided for @showTimeIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Do the magic on your family! Read these lines out loud:'**
+  String get showTimeIntro;
+
+  /// No description provided for @scriptThink.
+  ///
+  /// In en, this message translates to:
+  /// **'Think of a number.'**
+  String get scriptThink;
+
+  /// No description provided for @scriptDouble.
+  ///
+  /// In en, this message translates to:
+  /// **'Double it.'**
+  String get scriptDouble;
+
+  /// No description provided for @scriptAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {n}.'**
+  String scriptAdd(int n);
+
+  /// No description provided for @scriptHalve.
+  ///
+  /// In en, this message translates to:
+  /// **'Take half.'**
+  String get scriptHalve;
+
+  /// No description provided for @scriptSubtract.
+  ///
+  /// In en, this message translates to:
+  /// **'Take away the number you started with.'**
+  String get scriptSubtract;
+
+  /// No description provided for @scriptReveal.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answer is {k}!'**
+  String scriptReveal(int k);
+
+  /// No description provided for @circusGames.
+  ///
+  /// In en, this message translates to:
+  /// **'Circus Games'**
+  String get circusGames;
+
+  /// No description provided for @jugglerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Juggler\'s Balls'**
+  String get jugglerTitle;
+
+  /// No description provided for @jugglerTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Find the ball that makes 10!'**
+  String get jugglerTagline;
+
+  /// No description provided for @jugglerAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'Which ball makes {target}?'**
+  String jugglerAsk(int target);
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
 }
 
 class _AppLocalizationsDelegate

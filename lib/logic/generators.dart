@@ -3,7 +3,10 @@ import 'dart:math';
 import 'problem.dart';
 
 /// Skill ids double as keys in saved progress.
-enum SkillId { add, sub, mul, div, trickX11 }
+enum SkillId { add, sub, mul, div, trickX11, trickX5, makeTen }
+
+/// Trick School skills: practice unlocks a card instead of changing level.
+const trickSkills = {SkillId.trickX11, SkillId.trickX5};
 
 const int maxLevel = 5;
 
@@ -25,6 +28,8 @@ abstract class SkillGenerator {
       SkillId.mul => MultiplicationGenerator(r),
       SkillId.div => DivisionGenerator(r),
       SkillId.trickX11 => TimesElevenGenerator(r),
+      SkillId.trickX5 => TimesFiveGenerator(r),
+      SkillId.makeTen => MakeTenGenerator(r),
     };
   }
 }
@@ -193,5 +198,81 @@ class TimesElevenGenerator extends SkillGenerator {
       answer: a * 11,
       hintSteps: ['$tens _ $ones', '$tens + $ones = ?'],
     );
+  }
+}
+
+/// The ×5 trick: multiply by 10, then take half. Even numbers keep the
+/// halving step easy (480 ÷ 2), so the trick only uses even numbers.
+class TimesFiveGenerator extends SkillGenerator {
+  TimesFiveGenerator(super.random);
+
+  @override
+  Problem generate(int level) {
+    final a = 2 * _range(6, 49); // 12..98, even
+    return Problem(
+      a: a,
+      b: 5,
+      op: Op.mul,
+      answer: a * 5,
+      hintSteps: ['$a × 10 = ${a * 10}', '${a * 10} ÷ 2 = ?'],
+    );
+  }
+}
+
+/// Juggler's Balls: "friends of 10" and bigger complements.
+/// Shown as `a + ? = b`; the answer is b − a.
+class MakeTenGenerator extends SkillGenerator {
+  MakeTenGenerator(super.random);
+
+  static int targetFor(int level) => switch (level.clamp(1, maxLevel)) {
+        1 => 10,
+        2 => 20,
+        3 => 50,
+        _ => 100,
+      };
+
+  @override
+  Problem generate(int level) {
+    final lv = level.clamp(1, maxLevel);
+    final target = targetFor(lv);
+    final int a = switch (lv) {
+      1 => _range(1, 9),
+      2 => _range(1, 19),
+      3 => 5 * _range(1, 9), // 5..45
+      4 => 10 * _range(1, 9), // 10..90
+      _ => 5 * _range(1, 19), // 5..95
+    };
+    final missing = target - a;
+    final String hint;
+    if (target == 10) {
+      hint = '${'●' * a}${'○' * missing}';
+    } else if (target == 20 && a > 10) {
+      hint = '$a + ${10 - a % 10 == 10 ? 0 : 10 - a % 10} = ${a + (10 - a % 10) % 10},  ${a + (10 - a % 10) % 10} + ? = 20';
+    } else if (target == 20) {
+      hint = '$a + ${10 - a} = 10,  10 + 10 = 20';
+    } else {
+      final up = (10 - a % 10) % 10;
+      hint = up == 0 ? '$a + 10 + 10 ... = $target' : '$a + $up = ${a + up},  ${a + up} + ? = $target';
+    }
+    return Problem(a: a, b: target, op: Op.add, answer: missing, hintSteps: [hint]);
+  }
+
+  /// Four balls to choose from: the answer plus three near misses.
+  List<int> choices(Problem p) {
+    final step = p.b >= 50 ? 5 : 1;
+    final set = <int>{p.answer};
+    final candidates = [
+      p.answer + step, p.answer - step, p.answer + 2 * step, p.answer - 2 * step,
+      p.a, p.answer + 10, p.answer - 10,
+    ]..shuffle(random);
+    for (final c in candidates) {
+      if (set.length == 4) break;
+      if (c > 0 && c < p.b) set.add(c);
+    }
+    var extra = 1;
+    while (set.length < 4) {
+      set.add(extra++);
+    }
+    return set.toList()..shuffle(random);
   }
 }
