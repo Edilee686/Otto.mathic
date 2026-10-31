@@ -1,0 +1,48 @@
+name: Build Android APK
+
+# Builds a test APK on every push to main (and on demand) and attaches it to
+# the workflow run as the "number-tricksters-apk" artifact (download from the
+# run's Summary page while signed in to GitHub; kept for 30 days).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+      # Signed with the debug key for now (fine for testing; Play Store needs a real key).
+      - run: flutter build apk --release
+
+      - run: cp build/app/outputs/flutter-apk/app-release.apk number-tricksters.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: number-tricksters-apk
+          path: number-tricksters.apk
+          retention-days: 30
